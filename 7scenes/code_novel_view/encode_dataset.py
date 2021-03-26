@@ -134,6 +134,7 @@ class encoder(object):
         import re
         print(" [*] Reading checkpoints...")
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+        print(ckpt)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
             self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
@@ -174,13 +175,12 @@ with tf.Session() as sess:
                 m = ps.reshape((3, 4))[:3, :3]
                 theta, phi, gamma = txe.mat2euler(m, 'sxyz')
                 loc -= min_locs
-                angle = np.array((theta + np.pi, phi + np.pi/2, gamma + np.pi))
+                angle = np.array((theta + np.pi, phi + np.pi/2, gamma + np.pi)) #translate to [0, 2pi] [0, pi] [0 2pi] for encoding
                 loc = np.reshape(loc, (1, 3)) / 0.1
                 angle = np.reshape(angle, (1, 3)) / (np.pi / 18)
                 vec_x, vec_y, vec_z, vec_theta, vec_phi, vec_ksi  = my_encoder.encode(loc, angle)
                 v_all = np.concatenate([np.squeeze(vec_x), np.squeeze(vec_y), np.squeeze(vec_z), \
-                                        np.squeeze(vec_theta), np.squeeze(vec_phi), np.squeeze(vec_ksi),\
-                                        np.squeeze(loc * 0.1), np.squeeze(angle * np.pi/18)], axis=0)
+                                        np.squeeze(vec_theta), np.squeeze(vec_phi), np.squeeze(vec_ksi)], axis=0)
                 np.save(os.path.join(seq_path, 'frame_{:06d}_posvec.npy').format(i), v_all)
                 count += 1
                 if count % 500 == 0:
@@ -233,9 +233,10 @@ with tf.Session() as sess:
     ksi_norms = np.transpose(np.linalg.norm(vec_ksi, axis=-1, keepdims=True))
     vec_ksi = np.transpose(vec_ksi)
 
+    # translate angles back to (-np.pi, np.pi) (-np.pi/2, np.pi/2) (-np.pi, np.pi) to be used in camera pose estimation
     decoding_system = {
         'x': x * 0.1, 'y': y * 0.1, 'z': z * 0.1,\
-        'theta': theta * np.pi / 18, 'phi': phi * np.pi / 18, 'ksi': ksi * np.pi / 18,\
+        'theta': (theta * np.pi / 18 - np.pi), 'phi': (phi * np.pi / 18 - np.pi/2), 'ksi': (ksi * np.pi / 18 - np.pi),\
         'vec_x': vec_x, 'x_norms': x_norms, 'vec_y': vec_y, 'y_norms': y_norms, 'vec_z': vec_z, 'z_norms': z_norms , \
         'vec_theta': vec_theta, 'theta_norms': theta_norms, 'vec_phi': vec_phi, 'phi_norms': phi_norms, 'vec_ksi': vec_ksi, 'ksi_norms': ksi_norms
         }
