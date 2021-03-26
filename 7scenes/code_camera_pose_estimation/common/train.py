@@ -282,7 +282,7 @@ class Trainer(object):
         return
       # SAVE CHECKPOINT
       if (epoch % self.config['snapshot'] == 0 and epoch > 0) or (epoch == self.config['n_epochs']-1):
-        self.save_checkpoint(epoch + 1)
+        self.save_checkpoint(epoch)
         print('Epoch {:d} checkpoint saved for {:s}'.\
           format(epoch, self.experiment))
 
@@ -355,11 +355,11 @@ def step_feedfwd(data, model, cuda, decoding_sys, target=None, criterion=None, o
   :param max_grad_norm: if > 0, clips the gradient norm
   :return: 
   """
-  assert target.size()[-1] == 96 * 2 + 6
+  assert target.size()[-1] == 96 * 2 + 7
   if train:
     assert criterion is not None
 
-  data_var = Variable(data, requires_grad=train)
+  data_var = torch.tensor(data)
   if cuda:
     data_var = data_var.cuda(async=True)
   with torch.set_grad_enabled(train):
@@ -367,13 +367,11 @@ def step_feedfwd(data, model, cuda, decoding_sys, target=None, criterion=None, o
 
 
   output_array = output.cpu().data.numpy().reshape((-1, 192))
-  target_array = target.cpu().data.numpy().reshape((-1, 198))
-  target_x = target_array[:, -6]
-  target_y = target_array[:, -5]
-  target_z = target_array[:, -4]
-  target_theta = target_array[:, -3]
-  target_phi = target_array[:, -2]
-  target_ksi = target_array[:, -1]
+  target_array = target.cpu().data.numpy().reshape((-1, 199))
+  target_x = target_array[:, -7]
+  target_y = target_array[:, -6]
+  target_z = target_array[:, -5]
+  target_q = target_array[:, -4:]
 
   x_pred = output_array[:, : 32]
   y_pred = output_array[:, 32: 64]
@@ -414,7 +412,7 @@ def step_feedfwd(data, model, cuda, decoding_sys, target=None, criterion=None, o
   for jj in range(len(theta_infer)):
     q_infer = txe.euler2quat(theta_infer[jj], phi_infer[jj], ksi_infer[jj], axes='sxyz')
     q_infer *= np.sign(q_infer[0])
-    q_target = txe.euler2quat(target_theta[jj], target_phi[jj], target_ksi[jj], axes='sxyz')
+    q_target = target_q[jj]
     q_target *= np.sign(q_target[0])
     d = np.abs(np.dot(q_infer, q_target))
     d = min(1.0, max(-1.0, d))
@@ -427,7 +425,7 @@ def step_feedfwd(data, model, cuda, decoding_sys, target=None, criterion=None, o
     if cuda:
       target = target.cuda(async=True)
 
-    target_var = Variable(target[:, :192], requires_grad=False)
+    target_var = torch.tensor(target[:, :192])
     with torch.set_grad_enabled(train):
       loss = criterion(output, target_var)
 

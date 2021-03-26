@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-scenes=("chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs")
+scenes=("stairs" "fire" "heads" "office" "pumpkin" "redkitchen" "chess")
 for ((i=0;i<${#scenes[@]};++i));
 do
     scene=${scenes[i]}

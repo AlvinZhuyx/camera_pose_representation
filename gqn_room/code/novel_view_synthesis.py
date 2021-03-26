@@ -493,7 +493,7 @@ class recons_model(object):
             cur_grid_loc_pred, cur_rest_loc_pred = self.quantize_loc(cur_loc_pred)
 
 
-            for i in range(21):
+            for i in range(13):
                 cur_loc_std = 0.5 / 20.0 * i * loc_std
                 cur_view_std = 0.5 / 20.0 * i * view_std
                 feed_dict = {self.in_image_see: cur_img_see,
@@ -522,7 +522,7 @@ class recons_model(object):
             if count % 100 == 0:
                 print(i, count, time.time() - start_time, avg_Loss[0] / total_data, avg_psnr[0] / total_data)
 
-        for i in range(21):
+        for i in range(13):
             avg_Loss[i] /= total_data
             avg_psnr[i] /= total_data
             print("noise mag {}, time {}, avg_loss {}, avg_psnr {}".format(0.5 / 20 * i, time.time() - start_time,

@@ -13,6 +13,8 @@ from torch.utils import data
 from .utils import load_image
 import sys
 import pickle
+import transforms3d.euler as txe
+import transforms3d.quaternions as txq
 
 sys.path.insert(0, '../')
 from common.pose_utils import process_poses
@@ -65,8 +67,16 @@ class SevenScenes(data.Dataset):
 
           pss = []
           for i in frame_idx:
-            tmp_p = np.load(osp.join(seq_dir, 'frame_{:06d}_posvec.npy'.format(i)))
-            assert tmp_p.shape == (96 * 2 + 6,)
+            tmp_p = np.zeros(96 * 2 + 7)
+            tmp_embed = np.load(osp.join(seq_dir, 'frame_{:06d}_posvec.npy'.format(i)))
+            assert tmp_embed.shape == (96 * 2,)
+            tmp_p[:192] = tmp_embed
+            tmp_pose = np.loadtxt(osp.join(seq_dir, 'frame-{:06d}.pose.txt'.format(i))).flatten()[:12]
+            cur_min = np.squeeze(np.load(os.path.join(base_dir, 'min_loc_all.npy')))
+            tmp_loc = tmp_pose[[3, 7, 11]] - cur_min
+            tmp_pose = np.reshape(tmp_pose, (3, 4))[:3, :3]
+            tmp_p[-7:-4] = tmp_loc
+            tmp_p[-4:] = txq.mat2quat(tmp_pose)
             pss.append(tmp_p)
           ps[seq] = np.asarray(pss)
 
@@ -89,7 +99,7 @@ class SevenScenes(data.Dataset):
       else:
         mean_t, std_t = np.loadtxt(pose_stats_filename)
 
-      self.poses = np.empty((0, 96 * 2 + 6))
+      self.poses = np.empty((0, 96 * 2 + 7))
       for seq in seqs:
         self.poses = np.vstack((self.poses, ps[seq]))
 
