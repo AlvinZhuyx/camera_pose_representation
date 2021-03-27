@@ -11,13 +11,25 @@ directory contains 12 different scene driectories ("Angilola" "Annawan" "Beach" 
 "Denmark" "Dunmor" "Elmira" "Espanola" "Kerrtown"). Each of them contains images and poses in a couple of square areas where our agent moves in
 
 2. For novel view synthesis experiment, get into the "code" directory and run "novel_view_synthesis.py"
+* To reproduce the test the robustness to noise result: 
+Please first download our pretrained checkpoints:
+https://drive.google.com/file/d/1QU_eMV6eaadSe_p1o8MGTiCB3UVshMyO/view?usp=sharing
+Please extract it to the code directory (You should get the folder gibson_room/code/checkpoint)
+Then simply run:
+python novel_view_synthesis.py
 
-* For training the model, use the command: python novel_view_synthesis.py --train True
-* After training, test the reconstruction and test the robustness to noise: python novel_view_synthesis.py
+To retrain the model from scratch, use the command:  
+python novel_view_synthesis.py --train True
 
 For our experiment, we run the code at a single Titan RTX GPU(with 24GB memory) for 4 days. 
 
 3. For camera pose estimation experiment, get into the "code" directory and run "inference.py"
-Note that you need to first run the training to get the pose representation, then you can run this code.     
-* For training the model, use the command: python inference.py --train True
-* For testing: python inference.py
+Note that you need to first run the training to get the pose representation (or download our checkpoint), then you can run this code.     
+To reproduce our inference result, please first down load our pretrained inference model checkpoint:
+https://drive.google.com/file/d/16OiIY3wem0pDuNDJxBhKXr3aWei1s5KB/view?usp=sharing
+Please extract to the code directory (You should get the folder gibson_room/code/checkpoint_infer)
+(also please download the novel view synthesis checkpoint follows 2)
+Then simply run:
+python inference.py
+
+To retrain the model from scratch, use the command: python inference.py --train True

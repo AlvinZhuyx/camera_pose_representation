@@ -13,15 +13,26 @@ directory contains 3 driectories ("cars_train" "cars_train_test" "cars_train_val
  
 
 2. For novel view synthesis experiment, get into the "code" directory and run "novel_view_synthesis.py"
+* To reproduce the test the robustness to noise result: 
+Please first download our pretrained checkpoints:
+https://drive.google.com/file/d/1Mo1qAmi-Ob8ya4-VQ7BylJAE_4GIfhhu/view?usp=sharing
+Please extract it to the code directory (You should get the folder ShapNet_car/code/checkpoint)
+Then simply run:
+python novel_view_synthesis.py
 
-* For training the model, use the command: python novel_view_synthesis.py --train True
-* After training, test the reconstruction and test the robustness to noise: python novel_view_synthesis.py
-(We provide the checkpoint we get under the folder checkpoint)
+To retrain the model from scratch, use the command: 
+python novel_view_synthesis.py --train True
 
 For our experiment, we run the code at a single Titan RTX GPU(with 24GB memory) for 1 days. 
 
 3. For camera pose estimation experiment, get into the "code" directory and run "inference.py"
-Note that you need to first run the training to get the pose representation, then you can run this code.     
-* For training the model, use the command: python inference.py --train True
-* For testing: python inference.py
-(We profvide the checkpoint we get under the folder, checkpoint_infer)
+Note that you need to first run the training to get the pose representation (or download our checkpoint), then you can run this code.  
+
+To reproduce our inference result, please first down load our pretrained inference model checkpoint:
+https://drive.google.com/file/d/1JpKT-kJl0XVDmZRticYoC1MFMfOf3fxm/view?usp=sharing
+Please extract to the code directory (You should get the folder ShapNet_car/code/checkpoint_infer)
+(also please download the novel view synthesis checkpoint follows 2)
+Then simply run:
+python inference.py
+   
+To retrain the model from scratch, use the command: python inference.py --train True 

@@ -11,6 +11,7 @@ import argparse
 import math
 import pickle
 import transforms3d.euler as txe
+import transforms3d.quaternions as txq
 
 ##########################################################################################
 # build inference model upon learned vector representation
@@ -78,14 +79,34 @@ class dataloader(object):
             cur_angle = load_pose(angle_path)
             test_imgs.append(cur_img)
             pos = cur_angle[0:3, -1]
+            q1 = txq.mat2quat(cur_angle[:3, :3])
+            theta1_p, phi1_p, ksi1_p = txe.mat2euler(cur_angle[:3, :3], axes='rzxz')
             cur_r = np.sqrt(np.sum(pos * pos))
             tmpx = pos[0]
             tmpy = pos[1]
             tmpz = pos[2]
             theta = np.arctan2(tmpy, tmpx)
+            phi = np.arccos(tmpz / cur_r)
+
             if theta < 0:
                 theta += 2 * np.pi
-            phi = np.arccos(tmpz / cur_r)
+            theta_aligned = theta - np.pi/2
+            phi_aligned = np.pi - phi
+            ksi_aligned = np.pi
+            if np.abs(theta) < 2e-4 and np.abs(phi) < 2e-4:
+                ksi_aligned = np.pi / 2
+
+            # this checks whether the result we get from aligned theta and phi agrees with the original rotation (directly from rotation matrix)
+            # i.e. prove the correctness of our later on calculation for quaternion
+            q2 = txe.euler2quat(theta_aligned, phi_aligned, ksi_aligned, axes='rzxz')
+            d = np.abs(np.dot(q1, q2))
+            d = min(1.0, max(-1.0, d))
+            tmp_angle_diff = 2 * np.arccos(d) * 180 / np.pi
+            if tmp_angle_diff > 1e-3:
+                print(theta_aligned / np.pi * 180, phi_aligned / np.pi * 180, ksi_aligned / np.pi * 180)
+                print(theta1_p / np.pi * 180, phi1_p / np.pi * 180, ksi1_p / np.pi * 180)
+                print(tmp_angle_diff)
+                assert False
             test_angles.append((theta, phi))
 
         test_imgs = np.array(test_imgs)
@@ -278,7 +299,7 @@ class recons_model(object):
 
     def save(self, step):
         model_name = 'infer.model'
-        checkpoint_dir = os.path.join(self.checkpoint_dir_save, self.model_dir())
+        checkpoint_dir = self.checkpoint_dir_save
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
         self.saver.save(self.sess, os.path.join(checkpoint_dir, model_name), global_step=step)
@@ -373,10 +394,21 @@ class recons_model(object):
                 for jj in range(len(theta_infer)):
                     tmp_theta_infer = theta_infer[jj] * self.grid_angle
                     tmp_phi_infer = phi_infer[jj] * self.grid_angle
+                    # transform to the camera pose rotation space (so that the quaternion agrees with the original rotation matrix)
+                    theta_infer_aligned = tmp_theta_infer - np.pi / 2
+                    phi_infer_aligned = np.pi - tmp_phi_infer
+                    ksi_infer_aligned = np.pi
+                    if np.abs(tmp_theta_infer) < 2e-4 and np.abs(tmp_phi_infer) < 2e-4:
+                        ksi_infer_aligned = np.pi / 2
                     tmp_theta_target = cur_theta[jj] * self.grid_angle
                     tmp_phi_target = cur_phi[jj] * self.grid_angle
-                    q_infer = txe.euler2quat(tmp_theta_infer, 0.0, tmp_phi_infer)
-                    q_target = txe.euler2quat(tmp_theta_target, 0.0, tmp_phi_target)
+                    theta_target_aligned = tmp_theta_target - np.pi / 2
+                    phi_target_aligned = np.pi - tmp_phi_target
+                    ksi_target_aligned = np.pi
+                    if np.abs(tmp_theta_target) < 2e-4 and np.abs(tmp_phi_target) < 2e-4:
+                        ksi_target_aligned = np.pi / 2
+                    q_infer = txe.euler2quat(theta_infer_aligned, phi_infer_aligned,ksi_infer_aligned, axes = 'rzxz')
+                    q_target = txe.euler2quat(theta_target_aligned, phi_target_aligned, ksi_target_aligned, axes='rzxz')
                     d = np.abs(np.dot(q_infer, q_target))
                     d = min(1.0, max(-1.0, d))
                     tmp_angle_diff = 2 * np.arccos(d) * 180 / np.pi
@@ -390,7 +422,6 @@ class recons_model(object):
                 count += 1
         avg_angle_diff /= total_data
         print("final result angle diff {:.3f}".format(avg_angle_diff))
-
 
     def train(self):
         self.build_model()
@@ -519,10 +550,22 @@ class recons_model(object):
                 for jj in range(len(theta_infer)):
                     tmp_theta_infer = theta_infer[jj] * self.grid_angle
                     tmp_phi_infer = phi_infer[jj] * self.grid_angle
+                    # convert the angle of theta phi to the camera pose angle (defined by the camera pose matrix)
+                    # the correctness of this conversion is checked in line101 - line104
+                    theta_infer_aligned = tmp_theta_infer - np.pi / 2
+                    phi_infer_aligned = np.pi - tmp_phi_infer
+                    ksi_infer_aligned = np.pi
+                    if np.abs(tmp_theta_infer) < 2e-4 and np.abs(tmp_phi_infer) < 2e-4:
+                        ksi_infer_aligned = np.pi / 2
                     tmp_theta_target = cur_theta[jj] * self.grid_angle
                     tmp_phi_target = cur_phi[jj] * self.grid_angle
-                    q_infer = txe.euler2quat(tmp_theta_infer, 0.0, tmp_phi_infer)
-                    q_target = txe.euler2quat(tmp_theta_target, 0.0, tmp_phi_target)
+                    theta_target_aligned = tmp_theta_target - np.pi / 2
+                    phi_target_aligned = np.pi - tmp_phi_target
+                    ksi_target_aligned = np.pi
+                    if np.abs(tmp_theta_target) < 2e-4 and np.abs(tmp_phi_target) < 2e-4:
+                        ksi_target_aligned = np.pi / 2
+                    q_infer = txe.euler2quat(theta_infer_aligned, phi_infer_aligned, ksi_infer_aligned, axes='rzxz')
+                    q_target = txe.euler2quat(theta_target_aligned, phi_target_aligned, ksi_target_aligned, axes='rzxz')
                     d = np.abs(np.dot(q_infer, q_target))
                     d = min(1.0, max(-1.0, d))
                     tmp_angle_diff = 2 * np.arccos(d) * 180 / np.pi
@@ -562,10 +605,20 @@ class recons_model(object):
                         for jj in range(len(theta_infer)):
                             tmp_theta_infer = theta_infer[jj] * self.grid_angle
                             tmp_phi_infer = phi_infer[jj] * self.grid_angle
-                            tmp_theta_target = cur_vtheta[jj] * self.grid_angle
-                            tmp_phi_target = cur_vphi[jj] * self.grid_angle
-                            q_infer = txe.euler2quat(tmp_theta_infer, 0.0, tmp_phi_infer)
-                            q_target = txe.euler2quat(tmp_theta_target, 0.0, tmp_phi_target)
+                            theta_infer_aligned = tmp_theta_infer - np.pi / 2
+                            phi_infer_aligned = np.pi - tmp_phi_infer
+                            ksi_infer_aligned = np.pi
+                            if np.abs(tmp_theta_infer) < 2e-4 and np.abs(tmp_phi_infer) < 2e-4:
+                                ksi_infer_aligned = np.pi / 2
+                            tmp_theta_target = cur_theta[jj] * self.grid_angle
+                            tmp_phi_target = cur_phi[jj] * self.grid_angle
+                            theta_target_aligned = tmp_theta_target - np.pi / 2
+                            phi_target_aligned = np.pi - tmp_phi_target
+                            ksi_target_aligned = np.pi
+                            if np.abs(tmp_theta_target) < 2e-4 and np.abs(tmp_phi_target) < 2e-4:
+                                ksi_target_aligned = np.pi / 2
+                            q_infer = txe.euler2quat(theta_infer_aligned, phi_infer_aligned, ksi_infer_aligned, axes='rzxz')
+                            q_target = txe.euler2quat(theta_target_aligned, phi_target_aligned, ksi_target_aligned, axes='rzxz')
                             d = np.abs(np.dot(q_infer, q_target))
                             d = min(1.0, max(-1.0, d))
                             tmp_angle_diff = 2 * np.arccos(d) * 180 / np.pi
@@ -599,7 +652,7 @@ parser.add_argument('--nimg_per_ins', type=int, default=20, help='Number of imag
 parser.add_argument('--print_iter', type=int, default=100, help='Number of iteration between print out')
 parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')  # TODO was 0.003
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
-parser.add_argument('--gpu', type=str, default='0', help='Which gpu to use')
+parser.add_argument('--gpu', type=str, default='1', help='Which gpu to use')
 parser.add_argument('--train', type=bool, default=False, help='Train the model or test the trained model')
 
 # structure parameters

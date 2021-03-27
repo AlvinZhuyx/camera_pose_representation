@@ -304,8 +304,8 @@ class recons_model(object):
         v_theta_add0_rot = self.motion_model(M_theta_add, v_theta_add0)
         v_phi_add0_rot = self.motion_model(M_phi_add, v_phi_add0)
         
-        self.rot_loss = 0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_theta0_rot -  v_theta1), axis=0)) + \
-                        0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_theta_add0_rot -  v_theta_add1), axis=0)) + \
+        self.rot_loss = 0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_theta0_rot - v_theta1), axis=0)) + \
+                        0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_theta_add0_rot - v_theta_add1), axis=0)) + \
                         0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_phi0_rot - v_phi1), axis=0)) + \
                         0.5 * self.rot_reg_weight * tf.reduce_sum(tf.reduce_mean(tf.square(v_phi_add0_rot - v_phi_add1), axis=0))
         
@@ -672,7 +672,7 @@ parser.add_argument('--nimg_per_ins', type=int, default=10, help='Number of imag
 parser.add_argument('--print_iter', type=int, default=1070, help='Number of iteration between print out')
 parser.add_argument('--lr', type=float, default=1.0e-4, help='Learning rate')
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
-parser.add_argument('--gpu', type=str, default='0', help='Which gpu to use')
+parser.add_argument('--gpu', type=str, default='1', help='Which gpu to use')
 parser.add_argument('--update_step', type=int, default=3, help='Number of inference step in Langevin')
 parser.add_argument('--update_step_sz', type=float, default=1.0e-4, help='Step size for Langevin update')
 parser.add_argument('--train', type=bool, default=False, help='train the model or test robustness to noise')
