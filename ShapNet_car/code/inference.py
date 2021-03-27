@@ -94,6 +94,9 @@ class dataloader(object):
             phi_aligned = np.pi - phi
             ksi_aligned = np.pi
             if np.abs(theta) < 2e-4 and np.abs(phi) < 2e-4:
+				# the dataset represents camera pose for the top (view theta = 0 phi = 0) use a slightly different rotation matrix (corresponding to (-pi/2, pi, pi/2))
+				# so here we just follow their definition in calculating the quaternion. Actually because we are calculate the angle difference between prediction and target,
+                # so this does not influence our testing result.				
                 ksi_aligned = np.pi / 2
 
             # this checks whether the result we get from aligned theta and phi agrees with the original rotation (directly from rotation matrix)

@@ -79,7 +79,7 @@ for s in scenes:
                     ## index is originally designed for our model to pick pairs of images that are close to each other;
                     ## At first, we only pick successive images and leave out the last image to prevent picking the images from two different seqs
                     ## Then we also tries to pick image pairs that has one or two images between them and we find that occasionally picking images
-                    ## from two sequences does not influence the overall model training (since this happens with only a chance of 1/1000) so we just keep using this file.
+                    ## from two sequences does not influence the overall model training (since this happens with only a chance of 1/1000, and we see the rotation loss decrease well) so we just keep using this file.
                     locs = np.copy(cur_locs)
                     angles = np.copy(cur_angles)
                     images = np.copy(cur_images)
