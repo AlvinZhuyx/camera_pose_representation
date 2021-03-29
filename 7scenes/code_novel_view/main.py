@@ -152,7 +152,6 @@ class recons_model(object):
         return tf.nn.tanh(h10)
 
     def build_model(self):
-        # currently we seperate the angle changes
         self.in_image0 = tf.placeholder(dtype=tf.float32, shape=[None, self.im_sz, self.im_sz, self.channel])
         self.in_image1 = tf.placeholder(dtype=tf.float32, shape=[None, self.im_sz, self.im_sz, self.channel])
         self.in_ins_idx = tf.placeholder(dtype=tf.int32, shape=[None])
@@ -510,7 +509,7 @@ parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')  # T
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
 parser.add_argument('--gpu', type=str, default='0', help='Which gpu to use')
 parser.add_argument('--update_step', type=int, default=2, help='Number of inference step in Langevin')
-parser.add_argument('--update_step_sz', type=float, default=1e-3, help='Step size for Langevin update')
+parser.add_argument('--update_step_sz', type=float, default=1e-3, help='Step size for updating camera pose embedding')
 # weight of different losses
 parser.add_argument('--recons_weight', type=float, default=0.009, help='Reconstruction loss weight')
 parser.add_argument('--rot_reg_weight', type=float, default=50.0, help='Regularization weight for whether vectors agree with each other')

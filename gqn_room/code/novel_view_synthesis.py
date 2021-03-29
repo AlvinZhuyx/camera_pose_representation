@@ -14,11 +14,7 @@ from matplotlib import cm
 import argparse
 import math
 
-##########################################################################################
-# model for self ego-motion
-# apply on synthetic dataset
-# we employ a inference model for all the instance-related parameters
-######################################### model ##########################################
+
 class recons_model(object):
     def __init__(self, FLAGS, sess):
         self.beta1 = FLAGS.beta1
@@ -710,7 +706,7 @@ parser.add_argument('--print_iter', type=int, default=5000, help='Number of iter
 parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')  # TODO was 0.003
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
 parser.add_argument('--gpu', type=str, default='0', help='Which gpu to use')
-parser.add_argument('--update_step_sz', type=float, default=1e-2, help='Step size for Langevin update')
+parser.add_argument('--update_step_sz', type=float, default=1e-2, help='Step size for updating camera pose representation')
 parser.add_argument('--train', type=bool, default=False, help='train model or test noise')
 # weight of different losses
 parser.add_argument('--recons_weight', type=float, default=0.05, help='Reconstruction loss weight')

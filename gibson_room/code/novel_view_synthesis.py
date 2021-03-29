@@ -749,7 +749,7 @@ parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')  # T
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
 parser.add_argument('--gpu', type=str, default='0', help='Which gpu to use')
 parser.add_argument('--update_step', type=int, default=2, help='Number of inference step in Langevin')
-parser.add_argument('--update_step_sz', type=float, default=1e-2, help='Step size for Langevin update')
+parser.add_argument('--update_step_sz', type=float, default=1e-2, help='Step size for leaning camera pose representation')
 parser.add_argument('--train', type=bool, default=False, help="Whether we are in train mode or test mode")
 # weight of different losses
 parser.add_argument('--recons_weight', type=float, default=0.01, help='Reconstruction loss weight')

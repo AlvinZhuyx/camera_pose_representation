@@ -16,7 +16,6 @@ import transforms3d.quaternions as txq
 ##########################################################################################
 # build inference model upon learned vector representation
 #########################################  data  #########################################
-# a dataloader that load part of the data at one time
 class dataloader(object):
     def __init__(self, path, nimg_per_ins, im_sz, validation_path=None, max_num_img=-1, max_ins=-1, test_path=None):
         assert max_num_img == -1 or max_num_img % 2 == 0

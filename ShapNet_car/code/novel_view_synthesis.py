@@ -12,15 +12,6 @@ from matplotlib import cm
 import argparse
 import math
 
-##########################################################################################
-# use pair of data and small angle changes
-# add addtional angle change to train rotation
-# add position decoder
-# replace bilinear interpolation with M rotation
-
-
-#########################################  data  #########################################
-# a dataloader that load part of the data at one time
 class dataloader(object):
     def __init__(self, path, nimg_per_ins, im_sz, validation_path=None, max_num_img=-1, max_ins=-1, test_path=None):
         assert max_num_img == -1 or max_num_img % 2 == 0
@@ -674,7 +665,7 @@ parser.add_argument('--lr', type=float, default=1.0e-4, help='Learning rate')
 parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 in Adam optimizer')
 parser.add_argument('--gpu', type=str, default='1', help='Which gpu to use')
 parser.add_argument('--update_step', type=int, default=3, help='Number of inference step in Langevin')
-parser.add_argument('--update_step_sz', type=float, default=1.0e-4, help='Step size for Langevin update')
+parser.add_argument('--update_step_sz', type=float, default=1.0e-4, help='Step size for updating camera pose representation')
 parser.add_argument('--train', type=bool, default=False, help='train the model or test robustness to noise')
 # weight of different losses
 parser.add_argument('--recons_weight', type=float, default=0.05, help='Reconstruction loss weight')
