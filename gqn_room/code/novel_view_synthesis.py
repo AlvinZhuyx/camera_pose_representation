@@ -446,7 +446,7 @@ class recons_model(object):
         avg_Loss = {}
         avg_psnr = {}
         total_data = 0
-        for i in range(21):
+        for i in range(13):
             avg_Loss[i] = 0.0
             avg_psnr[i] = 0.0
         test_iter = iter(test_loader)
@@ -716,7 +716,7 @@ parser.add_argument('--dec_sigma', type=float, default=[0.07], help='Std of Gaus
 # structure parameters
 parser.add_argument('--num_block', type=int, default=6, help='Number of blocks in the representation')
 parser.add_argument('--block_size', type=int, default=16, help='Number of neurons per block')
-parser.add_argument('--grid_num', type=int, default=18, help='Number of grid angle')
+parser.add_argument('--grid_num', type=int, default=18, help='Number of grid angle in 0-180')
 parser.add_argument('--grid_angle', type=float, default=np.pi/18, help='Size of one angle grid')
 parser.add_argument('--num_B_loc', type=int, default=144, help='Number of head rotation')
 parser.add_argument('--num_B_dtheta', type=int, default=5, help='Number of dtheta in head rotation regularization')
