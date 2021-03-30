@@ -1,4 +1,7 @@
+This is the code for the CVPR paper: Learning Neural Representation for Camera Pose by View Synthesis
+
 In each folder is the code for each dataset. We include the instruction on each dataset in each folder.
+
 The requirements.txt includes all of our package version.
 We use python 3.6.8 and cuda 10.0
 One can use conda to create an environment:
