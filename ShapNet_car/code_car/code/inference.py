@@ -612,8 +612,8 @@ class recons_model(object):
                             ksi_infer_aligned = np.pi
                             if np.abs(tmp_theta_infer) < 2e-4 and np.abs(tmp_phi_infer) < 2e-4:
                                 ksi_infer_aligned = np.pi / 2
-                            tmp_theta_target = cur_theta[jj] * self.grid_angle
-                            tmp_phi_target = cur_phi[jj] * self.grid_angle
+                            tmp_theta_target = cur_vtheta[jj] * self.grid_angle
+                            tmp_phi_target = cur_vphi[jj] * self.grid_angle
                             theta_target_aligned = tmp_theta_target - np.pi / 2
                             phi_target_aligned = np.pi - tmp_phi_target
                             ksi_target_aligned = np.pi
